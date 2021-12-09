@@ -13,10 +13,13 @@ QIWI: https://qiwi.com/n/MO4KI
 # Немного скринов
 
   1-ый скрин:
+  
   ![](https://i.imgur.com/xE65R0s.png)
   
   2-ый скрин:
+  
   ![](https://i.imgur.com/ddvmoBu.png)
   
   3-ый скрин:
+  
   ![](https://i.imgur.com/lmB0BCW.png)
