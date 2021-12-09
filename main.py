@@ -1,91 +1,58 @@
-from telebot import *
-from SimpleQIWI import *
-from time import sleep
-import os, Configs
+choise = input("\n[1] Самостоятельный ввод\n[2] Автовычет\n[3] Подсчёт оценок\n[4] Описание\n: ")
+try:
+    int(choise)
+except:
+    print("Это не число. Это печально 😥")
+    exit(0)
 
-print("Qiwi Токен (" + Configs.QiwiToken + ") активен до 06.04.2022, после этого нужно будетвыпустить новый")
+if choise == "1":
+    five = input("\nКол-во пятёрок: "); four = input("Кол-во четвёрок: ")
+    three = input("Кол-во троек: "); two = input("Кол-во двоек: ")
 
-bot = telebot.TeleBot(Configs.TGToken, parse_mode="HTML")
+    try:
+        five = int(five); four = int(four)
+        three = int(three);  two = int(two)
+    except:
+        print("Это не похоже на числа. Это печально 😥")
+        exit(0)
 
-# Команда старт
-@bot.message_handler(commands=['start'])
-def text(message):
-	bot.send_message(message.chat.id, "<b>Привет!</b>")
+    res = (5*five + 4*four + 3*three + 2*two) / (five + four + three + two)
+    res = str(res)[:4]
+    print (f"Округлённый средний балл: {res}")
+    # (5 × n5 + 4 × n4 + 3 × n3 + 2 × n2) / (n5 + n4 + n3 + n2)
 
-	markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-	itembtn1 = types.KeyboardButton('Купить подписку')
-	itembtn2 = types.KeyboardButton('Подробнее')
-	markup.add(itembtn1, itembtn2)
+elif choise == "2":
+    text = input("\nВведите оценки: ").replace(" ", "")
+    try:
+        text = list(text)
+        five = text.count("5"); four = text.count("4")
+        three = text.count("3"); two = text.count("2")
 
-	sleep(0.5)
-	bot.send_message(message.chat.id, Configs.HelloMessage, reply_markup=markup)
+        resF = (5*five + 4*four + 3*three + 2*two) / (five + four + three + two)
+        res = str(resF)[:4]
 
-# Текст
-@bot.message_handler(content_types=['text'])
-def text(message):
+        print (f"Округлённый средний балл: {res}")
+        print (f"Итоговая оценка: {round(resF)}")
 
-	if message.text.lower() == "подробнее":
-		bot.send_message(message.chat.id, Configs.podrobnee)
+    except:
+        print("Это не похоже на числа. Это печально 😥")
+        exit(0)
 
-	elif message.text.lower() == "купить подписку":
-		api = QApi(token=Configs.QiwiToken, phone=Configs.phone)
+elif choise == "3":
+    text = input("\nВведите оценки: ").replace(" ", "")
+    try:
+        text = list(text)
+        print("\nПятёрок: " + str(text.count("5"))); print("Четвёрок: " + str(text.count("4")))
+        print("Троек: " + str(text.count("3"))); print("Двоек: " + str(text.count("5")))
+    except:
+        print("Это не похоже на числа. Это печально 😥")
+        exit(0)
 
-		api.start()
+elif choise == "4":
+    print("""
+[1]. Некоторые спросят, зачем нужен этот пункт. \nТак вот... Он нужен что бы прикинуть что нужно сделать что-бы изменить свой средний балл
+[2]. Нууу просто вам не надо подсчитывать свои оценки. Вот пример ввода: 4 4 4 3 5 5 4 4 \n(можно и без пробелов. Кстати это - часть моей реальной статистики)
+[3]. Подсчёт общего кол-ва двоек, троек и т.п
+[4]. Просто описание пунктов. Как вы уже поняли""")
 
-		price = 10
-		comment = api.bill(price)   # Создаем счет. Комментарий с которым должен быть платеж генерируется автоматически, но его можно задать                                 # параметром comment. Валютой по умолчанию считаются рубли, но ее можно изменить параметром currency
-		
-		oplata =  """
-<b>Оплата МЕСЯЧНОЙ подписки на SsStealer</b>
-
-Для получения подписки Вам необходимо перевести на Qiwi кошелек денежную сумму в размере """ + str(price) + """ рублей, указав комментарий (обязательно, не указав его автоматическая проверка не сможет проверить Ваш платеж)
-
-<b>Кошелек Qiwi:</b> """ + Configs.phone + """
-<b>Комментарий:</b> """ + comment + """
-<b>Сумма перевода:</b> """ + str(price) + """ рублей
-
-<b>Внимание!</b> После оплаты нажмите на соотвествующую кнопку для проверки Вашего платежа!
-		"""
-
-		markup = types.InlineKeyboardMarkup(row_width=1)
-		item = types.InlineKeyboardButton('Проверить оплату', callback_data='question_1')
-		markup.add(item)
-
-		bot.send_message(message.chat.id, oplata, reply_markup=markup)
-
-		@bot.callback_query_handler(func=lambda call:True)
-		def callback(call):
-			if call.message:
-				if call.data == 'question_1':
-					if api.check(comment):  # Проверяем статус
-						api.stop()  # Останавливаем прием платежей
-
-						bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.id, text= Configs.oplata)
-						bot.answer_callback_query(call.id, text="Платёж получен!")
-
-						print("Оплата получена!") # Здесь есть место для логирования людей что купили мой стиллер 
-						if os.path.exists("Users.txt") == False:
-							FUsers = open("Users.txt", "a")
-							FUsers.write("")
-
-						TFUsers = open("Users.txt")
-						text = TFUsers.read()
-						TFUsers.close
-
-						if str(call.from_user.username) in str(text):
-							pass
-
-						else:
-							FUsers = open("Users.txt", "a")
-							FUsers.write("User: " + str(call.from_user.username) + "; UserID: " + str(call.from_user.id)+ "\n")
-						FUsers.close()
-
-						builder(True, call.from_user.id)
-
-					else:
-						bot.answer_callback_query(call.id, text="Оплата не получена!")
-
-def builder(Kitty, Userid):
-	pass
-
-bot.polling()
+input("press enter, to exit")
