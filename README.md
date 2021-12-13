@@ -23,3 +23,8 @@ QIWI: https://qiwi.com/n/MO4KI
   3-ый скрин:
   
   ![](https://i.imgur.com/lmB0BCW.png)
+
+  И наконец мои нахуй никому не нужные рассуждения.
+  Встречайте! Влияние оценок на ср. балл:
+  
+  ![](https://i.imgur.com/G8Xt0tD.png)
